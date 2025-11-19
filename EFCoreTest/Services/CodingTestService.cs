@@ -26,20 +26,23 @@ public class CodingTestService(AppDbContext db, ILogger<CodingTestService> logge
         _logger.LogInformation("REPORT_START");
         var query = _db.Posts
             .AsNoTracking()
-            .Include(p => p.Author)
-            .Include(p => p.Comments)
-                .ThenInclude(c => c.Author)
-            .OrderBy(p => p.Id)
+            .Select(p => new {
+                PostId = p.Id, Author = p.Author,
+                CommentCount = p.Comments.Count(),
+                LatestComment = p.Comments.OrderByDescending(c => c.CreatedAt).FirstOrDefault(),
+                LatestCommentAuthor = p.Comments.Any()? p.Comments.OrderByDescending(c => c.CreatedAt).FirstOrDefault().Author: null,
+            })
+            .OrderBy(p => p.PostId)
             .Take(maxItems);
         var postSummaries = await query.ToListAsync();
-        foreach (var post in postSummaries)
+        foreach (var post in query)
         {
-            var latestComment = post.Comments.OrderByDescending(c => c.CreatedAt).FirstOrDefault();
-            var latestCommentAuthorName = latestComment?.Author?.Name ?? "N/A";
+            var latestCommentAuthor = post.LatestCommentAuthor;
+            var latestCommentAuthorName = latestCommentAuthor?.Name ?? "N/A";
             _logger.LogInformation("POST_SUMMARY|{PostId}|{AuthorName}|{CommentCount}|{LatestCommentAuthor}",
-                post.Id,
+                post.PostId,
                 post.Author?.Name ?? "N/A",
-                post.Comments.Count,
+                post.CommentCount,
                 latestCommentAuthorName);
         }
         _logger.LogInformation("REPORT_END");

@@ -24,7 +24,7 @@ internal class Program
                 {
                     // enable lazy-loading proxies
                     options.UseLazyLoadingProxies()
-                           .UseSqlServer("Server=localhost;Database=EFCoreTestDb;TrustServerCertificate=True;User ID=sa;Password=Initial#01;MultipleActiveResultSets=true");
+                           .UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=EFCoreTestDb;Trusted_Connection=True;MultipleActiveResultSets=true");
                 });
 
                 // add coding test service for candidates to implement their EF Core code

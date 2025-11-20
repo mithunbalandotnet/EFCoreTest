@@ -28,17 +28,14 @@ public class CodingTestService(AppDbContext db, ILogger<CodingTestService> logge
             .AsNoTracking()
             .Select(p => new {
                 PostId = p.Id, Author = p.Author,
-                CommentCount = p.Comments.Count(),
-                LatestComment = p.Comments.OrderByDescending(c => c.CreatedAt).FirstOrDefault(),
-                LatestCommentAuthor = p.Comments.Any()? p.Comments.OrderByDescending(c => c.CreatedAt).FirstOrDefault().Author: null,
+                CommentCount = p.Comments.Count()
             })
             .OrderBy(p => p.PostId)
             .Take(maxItems);
-        var postSummaries = await query.ToListAsync();
         foreach (var post in query)
         {
-            var latestCommentAuthor = post.LatestCommentAuthor;
-            var latestCommentAuthorName = latestCommentAuthor?.Name ?? "N/A";
+            var latestCommentAuthor = await _db.Comments.Include(c=> c.Author).Where(c=> c.PostId == post.PostId).OrderByDescending(c => c.CreatedAt).FirstOrDefaultAsync();
+            var latestCommentAuthorName = latestCommentAuthor?.Author?.Name ?? "N/A";
             _logger.LogInformation("POST_SUMMARY|{PostId}|{AuthorName}|{CommentCount}|{LatestCommentAuthor}",
                 post.PostId,
                 post.Author?.Name ?? "N/A",

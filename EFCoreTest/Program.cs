@@ -1,7 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using EFCoreTest.Data;
+﻿using EFCoreTest.Data;
 using EFCoreTest.Extensions;
 using EFCoreTest.Services;
 using Microsoft.EntityFrameworkCore;
